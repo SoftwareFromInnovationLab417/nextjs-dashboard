@@ -13,3 +13,12 @@ export interface Pokemon {
   speed: number;
   total: number;
 }
+
+export interface EventDto {
+  status: string;
+  matchName: string;
+  startTime: string;
+  endTime: string;
+  picture: string;
+  sponsorName?: string;
+}

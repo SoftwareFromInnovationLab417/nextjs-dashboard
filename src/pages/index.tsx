@@ -37,6 +37,7 @@ import {
   faTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import React from 'react'
+import OffCanvas from '@components/offCanvas'
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler)
 
@@ -44,6 +45,9 @@ const random = (min: number, max: number) => Math.floor(Math.random() * (max - m
 
 const Home: NextPage = () => (
   <AdminLayout>
+    {['top'].map((placement, idx) => (
+      <OffCanvas key={idx} placement={placement} name={placement} />
+    ))}
     <div className="row">
       <div className="col-sm-6 col-lg-3">
         <Card bg="primary" text="white" className="mb-4">
