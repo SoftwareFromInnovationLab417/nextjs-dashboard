@@ -1,7 +1,6 @@
 import OffCanvas from "@components/offCanvas";
 import { AdminLayout } from "@layout";
 import { API } from "@models/api";
-import { Detail, mapMatchStatus } from "@models/detil";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { use, useContext, useEffect, useState } from "react";
@@ -9,17 +8,19 @@ import { Button, Card, Table, Image, Row, Col, Badge, Alert, Pagination, Form, F
 import axiosInstance, { redirectAuth } from "src/axiosInstance";
 import { GlobalContext } from "src/globalData";
 
-import EditForm from "@components/MeditForm";
-import DetailForm from "@components/MdetialForm";
+import { EditForm, ED } from "@components/SeditForm";
+import DetailForm from "@components/SdetialForm";
+import { sponsor } from "@models/sponsorPlan";
 
 const Event: NextPage = () => {
   const router = useRouter()
   const { globalData, setGlobalData } = useContext(GlobalContext)
 
-  const [events, setEvents] = useState<Detail[]>([])
+  const [events, setEvents] = useState<sponsor[]>([])
 
   const [showDetail, setShowDetail] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
+  const [showAdd, setShowAdd] = useState(false)
   const [showIdx, setShowIdx] = useState(0)
   const [del, setDel] = useState(false)
 
@@ -30,15 +31,14 @@ const Event: NextPage = () => {
   // reload the table list
   const reloadTable = async (page: number) => {
     console.log('page: ' + page)
-    const url = `/match/admin_search`
-    const params = { page: page.toString(), size: '5', name: search }
+    const url = `/advertandprize/manager/search`
+    let params = { page: page.toString(), size: '5' }
     const res: API = await axiosInstance.get(`${url}?${new URLSearchParams(params)}`, {
       headers: {
         Authorization: globalData.token
       }
     })
     const { code, msg, data } = res
-    console.log(res)
     redirectAuth(code, router)
 
     if (code === 300) {
@@ -53,7 +53,47 @@ const Event: NextPage = () => {
     const evs: any[] = data
 
     // dto data
-    const d_e: Detail[] = []
+    const d_e: sponsor[] = []
+
+    // assign value
+    if (evs && evs.length !== 0)
+      evs.map((e) => {
+        d_e.push(e);
+      })
+    // console.log(d_e)
+
+    // set dto
+    setEvents(d_e)
+
+    return true
+  }
+
+  // used by the sponsor login
+  const reloadTableUserId = async (page: number) => {
+    console.log('page: ' + page)
+    const url = `/advertandprize/searchall`
+    let params = { userId: globalData.id, page: page.toString(), size: '5' }
+    const res: API = await axiosInstance.get(`${url}?${new URLSearchParams(params)}`, {
+      headers: {
+        Authorization: globalData.token
+      }
+    })
+    const { code, msg, data } = res
+    redirectAuth(code, router)
+
+    if (code === 300) {
+      setHasNext(false)
+      setEvents([])
+      return
+    }
+    else
+      setHasNext(true)
+
+    // raw data
+    const evs: any[] = data
+
+    // dto data
+    const d_e: sponsor[] = []
 
     // assign value
     if (evs && evs.length !== 0)
@@ -76,36 +116,31 @@ const Event: NextPage = () => {
     <AdminLayout>
       <Card>
         <Card.Header>
-          赛事
+          赞助计划
         </Card.Header>
+        <Button
+          style={{ margin: '10px' }}
+          variant='outline-info'
+          onClick={
+            () => {
+              setShowAdd(!showAdd)
+            }
+          }
+        >
+          添加赞助计划
+        </Button>
         <Card.Body>
-          <Form>
-            <Row className="mb-3">
-              <Form.Group as={Col}>
-                <Form.Control type="text" placeholder="赛事名称" onChange={async (e) => {
-                  const value = e.target.value
-                  setSearch(value)
-                }} />
-              </Form.Group>
-              <Form.Group as={Col}>
-                <Button variant="primary" style={{ margin: '0 10px' }} onClick={async () => {
-                  setCurPageIdx(1)
-                  await reloadTable(1)
-                }}>{'[>]'}</Button>
-              </Form.Group>
-            </Row>
-          </Form>
           <Table striped bordered hover>
             <thead>
               <tr>
                 <th>#</th>
-                <th>赛事名称</th>
                 <th>赞助商名称</th>
-                <th>赛事状态</th>
-                <th>开始时间</th>
-                <th>结束时间</th>
+                <th>赞助商电话</th>
+                <th>广告词</th>
+                <th>奖品</th>
+                <th>金额</th>
                 <th>图片</th>
-                <th>举办方名称</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -113,17 +148,16 @@ const Event: NextPage = () => {
                 return (
                   <tr key={idx} >
                     <td>{idx + 1}</td>
-                    <td>{e.matchName}</td>
-                    <td>{e.sponsor ? e.sponsor.nickName : null}</td>
-                    <td>{mapMatchStatus(e.status!.toString())}</td>
-                    <td>{e.startTime}</td>
-                    <td>{e.endTime}</td>
+                    <td>{e.userTableDTO.nickName}</td>
+                    <td>{e.userTableDTO.phone}</td>
+                    <td>{e.sponsorPlan.advertising}</td>
+                    <td>{e.sponsorPlan.prize}</td>
+                    <td>{e.sponsorPlan.money + '.00'}</td>
                     <td>
                       <div style={{ height: '0h', width: '5vw' }}>
-                        <Image src={`${e.picture}`} alt="picture" fluid />
+                        <Image src={`${e.sponsorPlan.picture}`} alt="picture" fluid />
                       </div>
                     </td>
-                    <td>{ }</td>
                     <td>
                       <Button
                         variant="secondary"
@@ -149,7 +183,7 @@ const Event: NextPage = () => {
                         onClick={
                           async () => {
                             setShowIdx(idx)
-                            const url = `/match/deleted?id=${events[showIdx].matchId}`
+                            const url = `/advertandprize/delete?sponsorPlanId=${events[showIdx].sponsorPlan.sponPlanId}`
                             const res = await axiosInstance.get(url, {
                               headers: {
                                 Authorization: globalData.token
@@ -189,17 +223,79 @@ const Event: NextPage = () => {
         </Card.Body>
       </Card>
 
-      <OffCanvas name="编辑赛事详细信息" show={showEdit} onHide={setShowEdit} placement="end">
+      <OffCanvas name="添加赞助计划详细信息" show={showAdd} onHide={setShowAdd} placement="start">
+        <div>
+          <AddForm />
+        </div>
+      </OffCanvas>
+      <OffCanvas name="编辑赞助计划详细信息" show={showEdit} onHide={setShowEdit} placement="end">
         <div>
           <EditForm data={events[showIdx]} />
         </div>
       </OffCanvas>
-      <OffCanvas name="查看赛事详细信息" show={showDetail} onHide={setShowDetail} placement="start">
+      <OffCanvas name="查看赞助计划详细信息" show={showDetail} onHide={setShowDetail} placement="start">
         <div>
           <DetailForm data={events[showIdx]} />
         </div>
       </OffCanvas>
     </AdminLayout>
+  )
+}
+
+interface AddProp {
+  advertising: string;
+  prize: string;
+  money: string;
+  picture: string;
+}
+
+function AddForm() {
+  const router = useRouter()
+  const [o, setO] = useState<AddProp>({ advertising: '', prize: '', money: '', picture: '' })
+
+  // server token
+  const { globalData, setGlobalData } = useContext(GlobalContext)
+
+  return (
+    <div>
+      <ED title='广告词' context={'请输入'} setContext={
+        (arg) => {
+          let t_o = o
+          t_o.advertising = arg
+          setO(t_o)
+        }
+      } />
+      <ED title='奖品' context={'请输入'} setContext={
+        (arg) => {
+          let t_o = o
+          t_o.prize = arg
+          setO(t_o)
+        }
+      } />
+      <ED title='金额' context={'请输入'} setContext={
+        (arg) => {
+          let t_o = o
+          t_o.money = arg
+          setO(t_o)
+        }
+      } />
+      <ED title='图片' context={'请输入'} image={true} setContext={
+        (arg: string) => {
+          let t_o = o
+          t_o.picture = arg
+          setO(t_o)
+        }} />
+      <Button variant="primary" onClick={async () => {
+        const url = '/advertandprize/add'
+        const res: API = await axiosInstance.post(url, o, {
+          headers: {
+            Authorization: globalData.token,
+          }
+        })
+        redirectAuth(res.code, router)
+        console.log(res)
+      }}>添加</Button>
+    </div>
   )
 }
 

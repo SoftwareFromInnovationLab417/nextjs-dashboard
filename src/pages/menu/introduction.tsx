@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { AdminLayout } from '@layout'
 import { Button, Card, Form } from 'react-bootstrap'
 import React, { useContext, useEffect, useState } from 'react'
-import axiosInstance from 'src/axiosInstance'
+import axiosInstance, { redirectAuth } from 'src/axiosInstance'
 import { GlobalContext } from 'src/globalData'
 import { useRouter } from 'next/router'
 import { API } from '@models/api'
@@ -32,11 +32,9 @@ const Introduction: NextPage<Props> = (props) => {
         }
       )
       const { code, msg, data } = res;
-      if (code === 479) {
-        router.push("/login")
-      }
-      console.log(res.data)
-      setIntroductions(res.data)
+      redirectAuth(code, router)
+      console.log(data)
+      setIntroductions(data)
     }
     init()
   }, [globalData.token, router])
@@ -46,7 +44,7 @@ const Introduction: NextPage<Props> = (props) => {
     const params = { note: introduction, day: introductionDay };
     // console.log(globalData.token)
     const token = globalData.token
-    const res = await axiosInstance.post(`${url}?${new URLSearchParams(params)}`, null,
+    const res: API = await axiosInstance.post(`${url}?${new URLSearchParams(params)}`, null,
       {
         headers: {
           Authorization: `${token}`
@@ -54,8 +52,9 @@ const Introduction: NextPage<Props> = (props) => {
       }
     )
 
+    redirectAuth(res.code, router)
 
-    {
+    { // update the dashboard
       const res: API = await axiosInstance.get("/match/notice/get",
         {
           headers: {
@@ -63,12 +62,13 @@ const Introduction: NextPage<Props> = (props) => {
           }
         }
       )
+
       const { code, msg, data } = res;
-      if (code === 479) {
-        router.push("/login")
-      }
-      console.log(res.data)
-      setIntroductions(res.data)
+
+      redirectAuth(code, router)
+
+      console.log(data)
+      setIntroductions(data)
     }
   }
 
@@ -89,7 +89,7 @@ const Introduction: NextPage<Props> = (props) => {
       <Button variant="secondary" style={{ margin: "10px 0" }} onClick={() => setShow(!show)}>
         添加公告
       </Button>
-      <OffCanvas name='添加公告' show={show} onHide={setShow} placement='top'>
+      <OffCanvas name='添加公告' show={show} onHide={setShow} placement='start'>
         <Form>
           <Form.Group controlId="exampleForm.ControlTextarea1" style={{ margin: '10px 0' }}>
             <Form.Label>公告内容</Form.Label>

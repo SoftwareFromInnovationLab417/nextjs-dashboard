@@ -1,7 +1,7 @@
 import React from "react";
 
 export const GlobalContext = React.createContext<{ globalData: GlobalData; setGlobalData: (data: GlobalData) => void }>({
-  globalData: { identity: '', token: '' },
+  globalData: { identity: '', token: '', id: '' },
   setGlobalData: () => { },
 });
 
@@ -9,6 +9,7 @@ export const GlobalContext = React.createContext<{ globalData: GlobalData; setGl
 export interface GlobalData {
   identity: string;
   token: string;
+  id: string
 }
 
-export const initGlobalData = { identity: '', token: '' }
+export const initGlobalData = { identity: '', token: '', id: '' }

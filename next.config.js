@@ -15,7 +15,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://8.134.152.127:8080/schoolmatch/:path*",
+        destination: "http://8.134.152.127:8089/schoolmatch/:path*",
       },
     ];
   },
