@@ -1,25 +1,29 @@
 import OffCanvas from "@components/offCanvas";
 import { AdminLayout } from "@layout";
 import { API } from "@models/api";
-import { Detail, mapMatchStatus } from "@models/detil";
+import { Detail, SponsorPlan, mapMatchStatus } from "@models/detail";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { use, useContext, useEffect, useState } from "react";
-import { Button, Card, Table, Image, Row, Col, Badge, Alert, Pagination, Form, FloatingLabel } from "react-bootstrap";
+import { Dispatch, SetStateAction, use, useContext, useEffect, useState } from "react";
+import { Button, Card, Table, Image, Row, Col, Pagination, Form, FloatingLabel, Spinner, Alert } from "react-bootstrap";
 import axiosInstance, { redirectAuth } from "src/axiosInstance";
-import { GlobalContext } from "src/globalData";
+import { GlobalContext, IdTable } from "src/globalData";
 
 import EditForm from "@components/MeditForm";
 import DetailForm from "@components/MdetialForm";
+import { sponsor, sponsorPlan } from "@models/sponsorPlan";
 
 const Event: NextPage = () => {
   const router = useRouter()
   const { globalData, setGlobalData } = useContext(GlobalContext)
+  const idf = IdTable.get(globalData.identity)
 
   const [events, setEvents] = useState<Detail[]>([])
 
   const [showDetail, setShowDetail] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
+  const [showSponsorPlan, setShowSponsorPlan] = useState(false)
+  const [spId, setSpId] = useState(0)
   const [showIdx, setShowIdx] = useState(0)
   const [del, setDel] = useState(false)
 
@@ -27,6 +31,9 @@ const Event: NextPage = () => {
   const [hasNext, setHasNext] = useState(false)
 
   const [search, setSearch] = useState('')
+
+
+
   // reload the table list
   const reloadTable = async (page: number) => {
     console.log('page: ' + page)
@@ -39,6 +46,10 @@ const Event: NextPage = () => {
     })
     const { code, msg, data } = res
     console.log(res)
+    // temporarily
+    if (globalData.token === '') {
+      redirectAuth(479, router)
+    }
     redirectAuth(code, router)
 
     if (code === 300) {
@@ -60,7 +71,7 @@ const Event: NextPage = () => {
       evs.map((e) => {
         d_e.push(e);
       })
-    // console.log(d_e)
+    console.log(d_e)
 
     // set dto
     setEvents(d_e)
@@ -70,7 +81,7 @@ const Event: NextPage = () => {
 
   useEffect(() => {
     reloadTable(curPageIdx)
-  }, [globalData, router, showDetail, showEdit, del])
+  }, [globalData, router, showDetail, showEdit, del, SelectSp])
 
   return (
     <AdminLayout>
@@ -134,31 +145,47 @@ const Event: NextPage = () => {
                             setShowIdx(idx)
                           }
                         }>查看</Button>
-                      <Button
-                        variant="info"
-                        style={{ margin: '0 5px' }}
-                        onClick={
-                          () => {
-                            setShowEdit(!showEdit)
-                            setShowIdx(idx)
-                          }
-                        }>编辑</Button>
-                      <Button
-                        variant="danger"
-                        style={{ margin: '0 5px' }}
-                        onClick={
-                          async () => {
-                            setShowIdx(idx)
-                            const url = `/match/deleted?id=${events[showIdx].matchId}`
-                            const res = await axiosInstance.get(url, {
-                              headers: {
-                                Authorization: globalData.token
-                              }
-                            })
-                            console.log(res)
-                            setDel(!del)
-                          }
-                        }>删除</Button>
+                      {
+                        idf !== 2 &&
+                        <div>
+                            <Button
+                              variant="info"
+                              style={{ margin: '0 5px' }}
+                              onClick={
+                                () => {
+                                  setShowEdit(!showEdit)
+                                  setShowIdx(idx)
+                                }
+                              }>编辑</Button>
+                            <Button
+                              variant="danger"
+                              style={{ margin: '0 5px' }}
+                              onClick={
+                                async () => {
+                                  setShowIdx(idx)
+                                  const url = `/match/deleted?id=${events[showIdx].matchId}`
+                                  const res = await axiosInstance.get(url, {
+                                    headers: {
+                                      Authorization: globalData.token
+                                    }
+                                  })
+                                  console.log(res)
+                                  setDel(!del)
+                                }
+                              }>删除</Button>
+                        </div>
+                      }
+                      {
+                        idf === 2 &&
+                        <Button
+                          variant="success"
+                          style={{ margin: '0 5px' }}
+                          onClick={
+                            () => {
+                              setShowSponsorPlan(!showSponsorPlan)
+                            }
+                          }>赞助计划</Button>
+                      }
                     </td>
                   </tr>
                 )
@@ -199,7 +226,132 @@ const Event: NextPage = () => {
           <DetailForm data={events[showIdx]} />
         </div>
       </OffCanvas>
-    </AdminLayout>
+      <OffCanvas name="选择赛事计划" show={showSponsorPlan} onHide={setShowSponsorPlan} placement="start" >
+        <div>
+          {/* <Button onClick={() => {
+            console.log(events[showIdx].matchId!)
+            console.log(globalData.identity)
+            console.log(showIdx)
+          }}>Click</Button> */}
+          {events &&
+            < SelectSp match={events[showIdx]} token={globalData.token} id={globalData.id} f={setSpId} />
+          }
+        </div>
+      </OffCanvas>
+    </AdminLayout >
+  )
+}
+
+interface SP {
+  match: Detail;
+  id: string;
+  f: Dispatch<SetStateAction<number>>;
+  token: string;
+}
+
+function SelectSp({ match, id, f, token }: SP) {
+  const router = useRouter()
+
+  const [showt, setShowt] = useState<sponsor[]>([])
+  const [showMsg, setShowMsg_] = useState('')
+  const setShowMsg = (msg: string) => {
+    setShowMsg_(msg)
+    setTimeout(() => {
+      setShowMsg_('')
+    }, 2000)
+  }
+  useEffect(() => {
+    async function init() {
+      const url = '/advertandprize/searchall'
+      const params = { userId: id, page: '1', size: '100' }
+      const res: API = await axiosInstance.get(`${url}?${new URLSearchParams(params)}`, {
+        headers: {
+          Authorization: token
+        }
+      })
+
+      const { code, msg, data } = res
+      redirectAuth(code, router)
+      const r: sponsor[] = []
+      const t = data as sponsorPlan[]
+
+      t.forEach((e) => {
+        r.push({
+          sponsorPlan: e
+        })
+      })
+
+      setShowt(r)
+    }
+
+    init()
+  }, [id])
+
+  const submit = async (choice: string) => {
+    const url = '/match/update'
+    const params = { matchId: match.matchId, startTime: match.startTime, sponsorId: id, sponPlanId: choice }
+    const res: API = await axiosInstance.post(url, params, {
+      headers: {
+        Authorization: token
+      }
+    })
+    const { code, msg, data } = res
+    redirectAuth(code, router)
+    setShowMsg(msg)
+  }
+
+  if (showt.length === 0) {
+    return (
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    )
+  }
+  return (
+    <>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>广告词</th>
+            <th>奖品</th>
+            <th>金额</th>
+            <th>图片</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {showt && showt.map((e, idx) => {
+            return (
+              <tr key={idx} >
+                <td>{idx + 1}</td>
+                <td>{e.sponsorPlan.advertising}</td>
+                <td>{e.sponsorPlan.prize}</td>
+                <td>{e.sponsorPlan.money + '.00'}</td>
+                <td>
+                  <div style={{ height: '0h', width: '5vw' }}>
+                    <Image src={`${e.sponsorPlan.picture}`} alt="picture" fluid />
+                  </div>
+                </td>
+                <td>
+                  <Button
+                    variant="secondary"
+                    style={{ margin: '0 5px' }}
+                    onClick={async () => {
+                      await submit(e.sponsorPlan.sponPlanId)
+                    }}>确认</Button>
+
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
+      {
+        showMsg &&
+        <Alert variant="success">{showMsg}</Alert>
+      }
+    </>
   )
 }
 

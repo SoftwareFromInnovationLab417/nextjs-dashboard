@@ -1,6 +1,6 @@
 export interface sponsor {
   sponsorPlan: sponsorPlan;
-  userTableDTO: userTableDto;
+  userTableDTO?: userTableDto;
 }
 
 export interface sponsorPlan {

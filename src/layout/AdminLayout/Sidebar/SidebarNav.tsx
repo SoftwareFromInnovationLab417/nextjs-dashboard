@@ -27,6 +27,7 @@ import {
 } from 'react-bootstrap'
 import classNames from 'classnames'
 import Link from 'next/link'
+import { GlobalContext, IdTable } from 'src/globalData'
 
 type SidebarNavItemProps = {
   href: string;
@@ -127,6 +128,8 @@ const SidebarNavGroup = (props: SidebarNavGroupProps) => {
 }
 
 export default function SidebarNav() {
+  const { globalData, setGlobalData } = useContext(GlobalContext)
+  const idf = IdTable.get(globalData.identity)
   return (
     <ul className="list-unstyled">
       <SidebarNavTitle>通用</SidebarNavTitle>
@@ -142,17 +145,27 @@ export default function SidebarNav() {
       <SidebarNavItem icon={faCode} href="/menu/playground">
         场地
       </SidebarNavItem>
-      <SidebarNavTitle>超管</SidebarNavTitle>
-      <SidebarNavItem icon={faCode} href="/menu/userManager">
-        用户管理
-      </SidebarNavItem>
-      <SidebarNavTitle>管理员</SidebarNavTitle>
-      <SidebarNavItem icon={faCode} href="/menu/auditOrganizer">
-        审核主办方
-      </SidebarNavItem>
-      <SidebarNavItem icon={faCode} href="/menu/auditEvent">
-        审核赛事
-      </SidebarNavItem>
-    </ul>
+      {
+        idf === 3 &&
+        <div>
+            <SidebarNavTitle>超管</SidebarNavTitle>
+            <SidebarNavItem icon={faCode} href="/menu/userManager">
+              用户管理
+            </SidebarNavItem>
+        </div>
+      }
+      {
+        (idf === 3 || idf === 1) &&
+        <div>
+            <SidebarNavTitle>管理员</SidebarNavTitle>
+            <SidebarNavItem icon={faCode} href="/menu/auditOrganizer">
+              审核主办方
+            </SidebarNavItem>
+            <SidebarNavItem icon={faCode} href="/menu/auditEvent">
+              审核赛事
+            </SidebarNavItem>
+        </div>
+      }
+    </ul >
   )
 }

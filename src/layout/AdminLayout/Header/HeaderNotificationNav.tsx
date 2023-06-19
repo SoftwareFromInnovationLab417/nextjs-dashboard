@@ -12,8 +12,9 @@ import {
   Badge, Dropdown, Nav, NavLink, ProgressBar,
 } from 'react-bootstrap'
 import Link from 'next/link'
-import React, { PropsWithChildren } from 'react'
+import React, { PropsWithChildren, useContext } from 'react'
 import Image from 'next/image'
+import { GlobalContext, IdTable } from 'src/globalData'
 
 type ItemWithIconProps = {
   icon: IconDefinition;

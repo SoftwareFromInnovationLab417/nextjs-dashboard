@@ -6,7 +6,7 @@ import {
   Button, Col, Container, Form, InputGroup, Row,
 } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert';
-import { SyntheticEvent, useContext, useState } from 'react'
+import { Dispatch, SetStateAction, SyntheticEvent, useContext, useState } from 'react'
 import { useRouter } from 'next/router'
 import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 import axiosInstance from 'src/axiosInstance'
@@ -54,8 +54,8 @@ const Login: NextPage = () => {
     const { code, msg, data } = res
     if (code === 200) {
       // setVisit(false)
-      setGlobalData({ identity: data.identity, token: data.token })
-      setCookie('auth', data.token)
+      setGlobalData({ identity: data.identity, token: data.token, id: data.id }),
+        setCookie('auth', data.token)
       console.log(data.token)
       router.push(getRedirect())
     } else {
@@ -141,4 +141,5 @@ const Login: NextPage = () => {
 }
 
 export default Login
+
 

@@ -3,23 +3,32 @@ import { AdminLayout } from "@layout";
 import { API } from "@models/api";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { use, useContext, useEffect, useState } from "react";
-import { Button, Card, Table, Image, Row, Col, Badge, Alert, Pagination, Form, FloatingLabel } from "react-bootstrap";
+import { useContext, useEffect, useState } from "react";
+import { Button, Card, Table, Image, Pagination, Alert } from "react-bootstrap";
 import axiosInstance, { redirectAuth } from "src/axiosInstance";
-import { GlobalContext } from "src/globalData";
+import { GlobalContext, IdTable } from "src/globalData";
 
 import { EditForm, ED } from "@components/SeditForm";
 import DetailForm from "@components/SdetialForm";
 import { sponsor } from "@models/sponsorPlan";
+import axios from "axios";
 
 const Event: NextPage = () => {
   const router = useRouter()
   const { globalData, setGlobalData } = useContext(GlobalContext)
+  const idf = IdTable.get(globalData.identity)
 
   const [events, setEvents] = useState<sponsor[]>([])
 
   const [showDetail, setShowDetail] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
+  const [showEditMsg, setShowEditMsg_] = useState(-1)
+  const setShowEdtMsg = (idx: number) => {
+    setShowEditMsg_(idx)
+    setTimeout(() => {
+      setShowEditMsg_(-1)
+    }, 2000)
+  }
   const [showAdd, setShowAdd] = useState(false)
   const [showIdx, setShowIdx] = useState(0)
   const [del, setDel] = useState(false)
@@ -98,7 +107,7 @@ const Event: NextPage = () => {
     // assign value
     if (evs && evs.length !== 0)
       evs.map((e) => {
-        d_e.push(e);
+        d_e.push({ sponsorPlan: e, userTableDTO: undefined });
       })
     // console.log(d_e)
 
@@ -109,7 +118,10 @@ const Event: NextPage = () => {
   }
 
   useEffect(() => {
-    reloadTable(curPageIdx)
+    if (idf !== 2)
+      reloadTable(curPageIdx)
+    else
+      reloadTableUserId(curPageIdx)
   }, [globalData, router, showDetail, showEdit, del])
 
   return (
@@ -134,8 +146,13 @@ const Event: NextPage = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>赞助商名称</th>
-                <th>赞助商电话</th>
+                {
+                  idf !== 2 &&
+                  <div>
+                      <th>赞助商名称</th>
+                      <th>赞助商电话</th>
+                  </div>
+                }
                 <th>广告词</th>
                 <th>奖品</th>
                 <th>金额</th>
@@ -148,8 +165,13 @@ const Event: NextPage = () => {
                 return (
                   <tr key={idx} >
                     <td>{idx + 1}</td>
-                    <td>{e.userTableDTO.nickName}</td>
-                    <td>{e.userTableDTO.phone}</td>
+                    {
+                      idf !== 2 &&
+                      <div>
+                        <td>{e.userTableDTO!.nickName}</td>
+                        <td>{e.userTableDTO!.phone}</td>
+                      </div>
+                    }
                     <td>{e.sponsorPlan.advertising}</td>
                     <td>{e.sponsorPlan.prize}</td>
                     <td>{e.sponsorPlan.money + '.00'}</td>
@@ -168,15 +190,37 @@ const Event: NextPage = () => {
                             setShowIdx(idx)
                           }
                         }>查看</Button>
-                      <Button
-                        variant="info"
-                        style={{ margin: '0 5px' }}
-                        onClick={
-                          () => {
-                            setShowEdit(!showEdit)
-                            setShowIdx(idx)
+                      {
+                        idf === 2 &&
+                        <>
+                          <Button
+                            variant="info"
+                            style={{ margin: '0 5px' }}
+                            onClick={
+                              async () => {
+                                const url = '/advertandprize/judge'
+                                const param = { sponsorPlanId: globalData.id }
+                                const res: API = await axiosInstance.get(`${url}?${new URLSearchParams(param)}`, {
+                                  headers: {
+                                    Authorization: globalData.token
+                                  }
+                                })
+                                const code = res.code
+                                redirectAuth(code, router)
+                                if (code === 4400) {
+                                  setShowEdit(!showEdit)
+                                  setShowIdx(idx)
+                                } else {
+                                  setShowEdtMsg(idx)
+                                }
+                              }
+                            }>编辑</Button>
+                          {
+                            showEditMsg === idx &&
+                            <Alert variant="danger" style={{ margin: '5px' }}>比赛已开赛, 请联系管理员</Alert>
                           }
-                        }>编辑</Button>
+                        </>
+                      }
                       <Button
                         variant="danger"
                         style={{ margin: '0 5px' }}
@@ -230,19 +274,21 @@ const Event: NextPage = () => {
       </OffCanvas>
       <OffCanvas name="编辑赞助计划详细信息" show={showEdit} onHide={setShowEdit} placement="end">
         <div>
-          <EditForm data={events[showIdx]} />
+          <EditForm data={events[showIdx]} sp={idf === 2} />
         </div>
       </OffCanvas>
       <OffCanvas name="查看赞助计划详细信息" show={showDetail} onHide={setShowDetail} placement="start">
         <div>
-          <DetailForm data={events[showIdx]} />
+          <DetailForm data={events[showIdx]} sp={idf === 2} />
         </div>
       </OffCanvas>
     </AdminLayout>
   )
 }
 
-interface AddProp {
+
+
+interface TD {
   advertising: string;
   prize: string;
   money: string;
@@ -251,7 +297,7 @@ interface AddProp {
 
 function AddForm() {
   const router = useRouter()
-  const [o, setO] = useState<AddProp>({ advertising: '', prize: '', money: '', picture: '' })
+  const [o, setO] = useState<TD>({ advertising: '', prize: '', money: '', picture: '' })
 
   // server token
   const { globalData, setGlobalData } = useContext(GlobalContext)

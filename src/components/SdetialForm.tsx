@@ -3,14 +3,19 @@ import { Alert, Image } from "react-bootstrap";
 
 interface DetailProps {
   data: sponsor;
+  sp: boolean;
 }
 
-function DetailForm({ data }: DetailProps) {
+export function DetailForm({ data, sp }: DetailProps) {
   return (
     <div>
       <DE title='赞助信息' context={null} />
-      <DE title='赞助商名称' context={data.userTableDTO.nickName} />
-      <DE title='赞助商电话' context={data.userTableDTO.phone} />
+      {
+        !sp && <div>
+          <DE title='赞助商名称' context={data.userTableDTO!.nickName} />
+          <DE title='赞助商电话' context={data.userTableDTO!.phone} />
+        </div>
+      }
       <DE title='广告词' context={data.sponsorPlan.advertising} />
       <DE title='奖品' context={data.sponsorPlan.prize} />
       <DE title='金额' context={data.sponsorPlan.money} />

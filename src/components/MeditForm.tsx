@@ -1,9 +1,9 @@
 import { API } from "@models/api";
-import { Detail, mapMatchStatus } from "@models/detil";
+import { Detail, mapMatchStatus } from "@models/detail";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { ChangeEvent, useContext, useState } from "react";
-import { Alert, Button, Col, FloatingLabel, Form, Row, Image } from "react-bootstrap";
+import { Alert, Button, Col, FloatingLabel, Form, Row, Image, Stack } from "react-bootstrap";
 import axiosInstance, { redirectAuth } from "src/axiosInstance";
 import { GlobalContext } from "src/globalData";
 
@@ -87,20 +87,35 @@ function EditForm({ data }: EditProps) {
           submitObj = addField(submitObj, 'matchName', arg)
           setDetail(t_d)
         }} />
-      <ED title='开始时间' context={detail.startTime} setContext={
+      {/* <ED title='开始时间' context={detail.startTime} setContext={
+        (arg) => {
+          let t_d = detail
+          t_d.startTime = arg
+          submitObj = addField(submitObj, 'startTime', arg)
+          setDetail(t_d)
+        }} /> */}
+      <DateSelector title='开始时间' context={detail.startTime} setContext={
         (arg) => {
           let t_d = detail
           t_d.startTime = arg
           submitObj = addField(submitObj, 'startTime', arg)
           setDetail(t_d)
         }} />
-      <ED title='结束时间' context={detail.endTime} setContext={
+      {/* <ED title='结束时间' context={detail.endTime} setContext={
         (arg) => {
           let t_d = detail
           t_d.endTime = arg
           submitObj = addField(submitObj, 'endTime', arg)
           setDetail(t_d)
-        }} />
+        }} /> */}
+      <DateSelector title='结束时间' context={detail.endTime} setContext={
+        (arg) => {
+          let t_d = detail
+          t_d.endTime = arg
+          submitObj = addField(submitObj, 'endTime', arg)
+          setDetail(t_d)
+        }}
+      />
       <ED title='图片' context={detail.picture} image={true} setContext={
         (arg) => {
           let t_d = detail
@@ -351,3 +366,30 @@ function ED({ title, context, setContext, disabled, image }: EDProp) {
 }
 
 export default EditForm
+
+function DateSelector({ title, context, setContext }: {
+  title: string,
+  context: string,
+  setContext: (arg0: string) => void;
+}) {
+  const sp = context.split(' ')
+  const [dateTime, setDateTime] = useState(sp[0])
+  const [time, setTime] = useState(sp[1])
+
+  return (
+    <Stack gap={3} style={{ margin: '5px' }}>
+      <label>{title}</label>
+      <input style={{ margin: '5px' }} type="date" value={dateTime} onChange={(e) => {
+        setDateTime(e.target.value)
+      }}
+      />
+      <input style={{ margin: '5px' }} type="time" value={time} step="2" onChange={(e) => {
+        setTime(e.target.value)
+      }} />
+      <Button style={{ margin: '5px' }} onClick={() => {
+        const t = dateTime + ' ' + time
+        setContext(t)
+      }}>确定时间</Button>
+    </Stack>
+  )
+}

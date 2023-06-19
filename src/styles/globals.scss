@@ -32,3 +32,6 @@ input[type=file]::file-selector-button {
   cursor: pointer;
   transition: background .2s ease-in-out;
 }
+body>div.offcanvas.offcanvas-start.show {
+  width: 80vw;
+}

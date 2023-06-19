@@ -1,4 +1,4 @@
-import { Detail } from "@models/detil";
+import { Detail } from "@models/detail";
 import { Alert, Image } from "react-bootstrap";
 
 interface DetailProps {
@@ -40,7 +40,10 @@ function DetailForm({ data }: DetailProps) {
           <DE title='广告词' context={data.sponsorPlan.advertising} />
           <DE title='奖品' context={data.sponsorPlan.prize} />
           <DE title='金额' context={data.sponsorPlan.money} />
-          <DE title='图片地址' context={data.sponsorPlan.picture} />
+          <DE title='图片地址' context={' '} />
+          <div style={{ height: '0h', width: '20vw', margin: '10px 0' }}>
+            <Image src={`${data.sponsorPlan.picture}`} alt="pic" fluid />
+          </div>
         </>
       }
       {

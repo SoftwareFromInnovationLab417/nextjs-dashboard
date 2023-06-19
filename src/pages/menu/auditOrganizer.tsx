@@ -8,14 +8,11 @@ import axiosInstance, { redirectAuth } from "src/axiosInstance";
 import { GlobalContext } from "src/globalData";
 
 interface TData {
-  organizersId: string;
-  placeId: string;
-  matchName: string;
-  startTime: string;
-  endTime: string;
-  picture: string;
-  introduction: string;
-  tag: string;
+  a1: string;
+  a2: string;
+  a3: string;
+  a4: string;
+  a5: string;
 }
 
 const mp = new Map([
@@ -31,34 +28,25 @@ const mp2 = new Map([
 
 const events: TData[] = [
   {
-    organizersId: '1667822270043664386',
-    placeId: '6',
-    matchName: '篮球火校园赛',
-    startTime: '2023-06-28 14:00:40',
-    endTime: '2023-06-30 17:00:12',
-    picture: 'http://qny.chatea-lovely.top/school_match/2023/06/17/264abf13a1f444f9.png',
-    introduction: '篮球火校园赛，赛出风采',
-    tag: '篮球，运动，竞技',
+    a1: '1667822270043664386',
+    a2: '校园活动中心',
+    a3: '校方',
+    a4: '李龙',
+    a5: '17822222222',
   },
   {
-    organizersId: '1667822270043664386',
-    placeId: '7',
-    matchName: '青春羽毛球',
-    startTime: '2023-06-29 14:02:15',
-    endTime: '2023-06-30 17:00:11',
-    picture: 'http://qny.chatea-lovely.top/school_match/2023/06/17/264abf13a1f444f9.png',
-    introduction: '跳',
-    tag: '羽毛球，运动，竞技',
+    a1: '1667822270043664386',
+    a2: '校园活动中心',
+    a3: '校方',
+    a4: '马露',
+    a5: '17822222222',
   },
   {
-    organizersId: '1667821866467733506',
-    placeId: '8',
-    matchName: '计算机算法大赛',
-    startTime: '2023-06-29 14:00:40',
-    endTime: '2023-07-29 17:00:01',
-    picture: 'http://qny.chatea-lovely.top/school_match/2023/06/17/264abf13a1f444f9.png',
-    introduction: 'rap',
-    tag: '知识，算法，竞赛',
+    a1: '1667822270043664386',
+    a2: '校园活动中心',
+    a3: '校方',
+    a4: '',
+    a5: '17822222222',
   },
 ]
 
@@ -95,7 +83,7 @@ const Event: NextPage = () => {
     <AdminLayout>
       <Card>
         <Card.Header>
-          赛事
+          审核主办方
         </Card.Header>
         <Card.Body>
           <Table striped bordered hover>
@@ -103,13 +91,10 @@ const Event: NextPage = () => {
               <tr>
                 <th>#</th>
                 <th>举办方id</th>
-                <th>场馆</th>
-                <th>赛事名</th>
-                <th>开始时间</th>
-                <th>结束时间</th>
-                <th>图片</th>
-                <th>赛事介绍</th>
-                <th>赛事标签</th>
+                <th>举办方名称</th>
+                <th>举办方单位</th>
+                <th>举办方联系人</th>
+                <th>联系人电话</th>
                 <th>审核</th>
               </tr>
             </thead>
@@ -118,18 +103,11 @@ const Event: NextPage = () => {
                 return (
                   <tr key={idx} >
                     <td>{idx + 1}</td>
-                    <td style={{ width: '10vw' }}>{mp2.get(e.organizersId)}</td>
-                    <td>{mp.get(e.placeId)}</td>
-                    <td>{e.matchName}</td>
-                    <td>{e.startTime}</td>
-                    <td>{e.endTime}</td>
-                    <td>
-                      <div style={{ height: '0h', width: '5vw' }}>
-                        <Image src={`${e.picture}`} alt="picture" fluid />
-                      </div>
-                    </td>
-                    <td>{e.introduction}</td>
-                    <td>{e.tag}</td>
+                    <td style={{ width: '10vw' }}>{e.a1}</td>
+                    <td>{e.a2}</td>
+                    <td>{e.a3}</td>
+                    <td>{e.a4}</td>
+                    <td>{e.a5}</td>
                     <td>
                       <Button
                         style={{ width: '8vw' }}

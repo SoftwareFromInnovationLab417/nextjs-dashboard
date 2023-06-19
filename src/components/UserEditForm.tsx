@@ -1,11 +1,11 @@
 import { API } from "@models/api";
-import { sponsor } from "@models/sponsorPlan";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { ChangeEvent, useContext, useState } from "react";
 import { Alert, Button, Col, FloatingLabel, Form, Row, Image } from "react-bootstrap";
 import axiosInstance, { redirectAuth } from "src/axiosInstance";
 import { GlobalContext } from "src/globalData";
+import { User } from "@models/user";
 
 interface DynamicalData { }
 
@@ -25,15 +25,14 @@ interface EDProp {
   context: any;
   disabled?: boolean;
   image?: boolean;
-  setContext?: (arg: string) => void;
+  setContext?: (arg0: string) => void;
 }
 
 interface EditProps {
-  data: sponsor;
-  sp: boolean
+  data: User;
 }
 
-export function EditForm({ data, sp }: EditProps) {
+function EditForm({ data }: EditProps) {
   const router = useRouter()
   // edit object
   const [detail, setDetail] = useState(data);
@@ -41,8 +40,6 @@ export function EditForm({ data, sp }: EditProps) {
   const [editSuc, setEditSuc] = useState(false);
   // server token
   const { globalData, setGlobalData } = useContext(GlobalContext)
-
-  const opt: string[] = []
 
   // dynamically set object fields
   let submitObj: DynamicalData = {}
@@ -57,10 +54,9 @@ export function EditForm({ data, sp }: EditProps) {
 
   // submit the picture url from cdn response
   const submitChange = async () => {
-    const url = '/advertandprize/manager/update'
-
+    const url = '/managerInfo/update'
     const res: API = await axiosInstance.post(url,
-      addField(submitObj, 'sponPlanId', detail.sponsorPlan.sponPlanId!), {
+      addField(submitObj, 'userId', detail.userId), {
       headers: {
         Authorization: globalData.token,
         'Content-Type': 'application/json',
@@ -76,39 +72,40 @@ export function EditForm({ data, sp }: EditProps) {
 
   return (
     <div>
-      <ED title='赞助信息' context={null} />
-      {
-        !sp && <div>
-          <ED title='赞助商名称' context={detail.userTableDTO!.nickName} />
-          <ED title='赞助商电话' context={detail.userTableDTO!.phone} />
-        </div>
-      }
-      <ED title='广告词' context={detail.sponsorPlan.advertising} setContext={
+      <ED title='用户管理' context={null} />
+      <ED title='昵称' context={detail.nickName} setContext={
         (arg) => {
           let t_d = detail
-          t_d.sponsorPlan.advertising = arg
-          submitObj = addField(submitObj, 'advertising', arg)
+          t_d.nickName = arg
+          submitObj = addField(submitObj, 'nickName', arg)
           setDetail(t_d)
         }} />
-      <ED title='奖品' context={detail.sponsorPlan.prize} setContext={
+      <ED title='账号' context={detail.account} setContext={
         (arg) => {
           let t_d = detail
-          t_d.sponsorPlan.prize = arg
-          submitObj = addField(submitObj, 'prize', arg)
+          t_d.account = arg
+          submitObj = addField(submitObj, 'account', arg)
           setDetail(t_d)
         }} />
-      <ED title='金额' context={detail.sponsorPlan.money} setContext={
+      <ED title='密码' context={'安全原因无法显示'} setContext={
         (arg) => {
           let t_d = detail
-          t_d.sponsorPlan.money = arg
-          submitObj = addField(submitObj, 'money', arg)
+          t_d.password = arg
+          submitObj = addField(submitObj, 'password', arg)
           setDetail(t_d)
         }} />
-      <ED title='图片' context={detail.sponsorPlan.picture} image={true} setContext={
-        (arg: string) => {
+      <ED title='身份' context={detail.status} setContext={
+        (arg) => {
           let t_d = detail
-          t_d.sponsorPlan.picture = arg
-          submitObj = addField(submitObj, 'picture', arg)
+          t_d.status = arg
+          submitObj = addField(submitObj, 'status', arg)
+          setDetail(t_d)
+        }} />
+      <ED title='姓名' context={detail.name} setContext={
+        (arg) => {
+          let t_d = detail
+          t_d.name = arg
+          submitObj = addField(submitObj, 'status', arg)
           setDetail(t_d)
         }} />
       <Row>
@@ -121,10 +118,11 @@ export function EditForm({ data, sp }: EditProps) {
             <Button variant="outline-success" disabled>修改成功</Button>
           }
         </Col>
-      </Row >
-    </div >
+      </Row>
+    </div>
   );
 }
+
 
 
 function getFileExtensionFromUrl(url: string): string {
@@ -164,31 +162,23 @@ async function onUpload(upload_file: File, g_token: string): Promise<string> {
   return CDNAddress + key
 }
 
-export function ED({ title, context, setContext, disabled, image }: EDProp) {
-  // image show base64 / url from cdn
-  const [img, setImg] = useState(context)
-  // server token
+function ED({ title, context, setContext, disabled, image }: EDProp) {
+  // base64 show
+  const [img, setImg] = useState('')
   const { globalData, setGlobalData } = useContext(GlobalContext)
-
   async function handleFileUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files![0];
-
     const reader = new FileReader();
 
     reader.onload = async () => {
       const imageRaw = reader.result as string
-      // set base64 image first
       setImg(imageRaw);
-      // upload image file object
       const imgUrl = await onUpload(file, globalData.token)
       setContext!(imgUrl)
     };
 
-    // read base64 first
     reader.readAsDataURL(file);
   }
-
-  // switch render image+choice or label+form
   if (image) {
     return (
       <div style={{ margin: '10px 0' }}>
@@ -240,3 +230,5 @@ export function ED({ title, context, setContext, disabled, image }: EDProp) {
     </div>
   )
 }
+
+export default EditForm

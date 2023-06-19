@@ -3,7 +3,7 @@ import { AdminLayout } from '@layout'
 import { Button, Card, Form } from 'react-bootstrap'
 import React, { useContext, useEffect, useState } from 'react'
 import axiosInstance, { redirectAuth } from 'src/axiosInstance'
-import { GlobalContext } from 'src/globalData'
+import { GlobalContext, IdTable } from 'src/globalData'
 import { useRouter } from 'next/router'
 import { API } from '@models/api'
 import OffCanvas from '@components/offCanvas'
@@ -17,6 +17,7 @@ const Introduction: NextPage<Props> = (props) => {
 
   const [introductions, setIntroductions] = useState('')
   const { globalData, setGlobalData } = useContext(GlobalContext)
+  const idf = IdTable.get(globalData.identity)
 
   const [show, setShow] = useState(false)
 
@@ -86,9 +87,11 @@ const Introduction: NextPage<Props> = (props) => {
           }
         </Card.Body>
       </Card>
-      <Button variant="secondary" style={{ margin: "10px 0" }} onClick={() => setShow(!show)}>
-        添加公告
-      </Button>
+      {
+        idf !== 2 &&
+        <Button variant="secondary" style={{ margin: "10px 0" }} onClick={() => setShow(!show)}>
+          添加公告
+        </Button>}
       <OffCanvas name='添加公告' show={show} onHide={setShow} placement='start'>
         <Form>
           <Form.Group controlId="exampleForm.ControlTextarea1" style={{ margin: '10px 0' }}>
