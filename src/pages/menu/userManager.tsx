@@ -265,12 +265,12 @@ function AddForm() {
           setO(t_o)
         }
       } />
-      <ED title='身份' context={'请输入'} setContext={
+      {/* <ED title='身份' context={'请输入'} setContext={
         (arg: string) => {
           let t_o = o
           t_o.status = arg
           setO(t_o)
-        }} />
+        }} /> */}
       <ED title='电话' context={'请输入'} setContext={
         (arg: string) => {
           let t_o = o
@@ -284,7 +284,7 @@ function AddForm() {
           setO(t_o)
         }} />
       <Button variant="primary" onClick={async () => {
-        const url = '/schoolmatch/managerInfo/add'
+        const url = '/managerInfo/add'
         const res: API = await axiosInstance.post(url, o, {
           headers: {
             Authorization: globalData.token,

@@ -45,7 +45,7 @@ const Introduction: NextPage<Props> = (props) => {
     const params = { note: introduction, day: introductionDay };
     // console.log(globalData.token)
     const token = globalData.token
-    const res: API = await axiosInstance.post(`${url}?${new URLSearchParams(params)}`, null,
+    const res: API = await axiosInstance.post(`${url}`, params,
       {
         headers: {
           Authorization: `${token}`

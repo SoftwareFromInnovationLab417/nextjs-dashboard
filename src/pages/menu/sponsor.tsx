@@ -148,10 +148,11 @@ const Event: NextPage = () => {
                 <th>#</th>
                 {
                   idf !== 2 &&
-                  <div>
-                      <th>赞助商名称</th>
-                      <th>赞助商电话</th>
-                  </div>
+                  <th>赞助商名称</th>
+                }
+                {
+                  idf !== 2 &&
+                  <th>赞助商电话</th>
                 }
                 <th>广告词</th>
                 <th>奖品</th>
@@ -167,10 +168,11 @@ const Event: NextPage = () => {
                     <td>{idx + 1}</td>
                     {
                       idf !== 2 &&
-                      <div>
-                        <td>{e.userTableDTO!.nickName}</td>
-                        <td>{e.userTableDTO!.phone}</td>
-                      </div>
+                      <td>{e.userTableDTO!.nickName}</td>
+                    }
+                    {
+                      idf !== 2 &&
+                      <td>{e.userTableDTO!.phone}</td>
                     }
                     <td>{e.sponsorPlan.advertising}</td>
                     <td>{e.sponsorPlan.prize}</td>

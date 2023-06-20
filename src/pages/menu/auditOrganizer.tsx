@@ -62,23 +62,6 @@ const Event: NextPage = () => {
     }, 2000)
   }
 
-  const submit = async (idx: number) => {
-    const data = events[idx]
-    const url = '/match/add'
-
-    const res: API = await axiosInstance.post(url, data, {
-      headers: {
-        Authorization: globalData.token
-      }
-    })
-
-    redirectAuth(res.code, router)
-    console.log(res)
-    if (res.code == 200) {
-      Show()
-    }
-  }
-
   return (
     <AdminLayout>
       <Card>
@@ -113,9 +96,7 @@ const Event: NextPage = () => {
                         style={{ width: '8vw' }}
                         variant="secondary"
                         onClick={
-                          async () => {
-                            await submit(idx)
-                          }
+                          () => Show()
                         }>审核通过</Button>
                     </td>
                   </tr>

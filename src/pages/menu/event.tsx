@@ -32,12 +32,14 @@ const Event: NextPage = () => {
 
   const [search, setSearch] = useState('')
 
-
+  const [notify, setNotify] = useState(true)
 
   // reload the table list
   const reloadTable = async (page: number) => {
     console.log('page: ' + page)
-    const url = `/match/admin_search`
+    let url = `/match/admin_search`
+    if (idf === 2)
+      url = `/match/search`
     const params = { page: page.toString(), size: '5', name: search }
     const res: API = await axiosInstance.get(`${url}?${new URLSearchParams(params)}`, {
       headers: {
@@ -81,7 +83,7 @@ const Event: NextPage = () => {
 
   useEffect(() => {
     reloadTable(curPageIdx)
-  }, [globalData, router, showDetail, showEdit, del, SelectSp])
+  }, [globalData, router, showDetail, showEdit, del, SelectSp, notify])
 
   return (
     <AdminLayout>
@@ -234,7 +236,7 @@ const Event: NextPage = () => {
             console.log(showIdx)
           }}>Click</Button> */}
           {events &&
-            < SelectSp match={events[showIdx]} token={globalData.token} id={globalData.id} f={setSpId} />
+            <SelectSp match={events[showIdx]} token={globalData.token} id={globalData.id} n={notify} sn={setNotify} />
           }
         </div>
       </OffCanvas>
@@ -245,11 +247,12 @@ const Event: NextPage = () => {
 interface SP {
   match: Detail;
   id: string;
-  f: Dispatch<SetStateAction<number>>;
   token: string;
+  n: boolean;
+  sn: Dispatch<SetStateAction<boolean>>
 }
 
-function SelectSp({ match, id, f, token }: SP) {
+function SelectSp({ match, id, token, n, sn }: SP) {
   const router = useRouter()
 
   const [showt, setShowt] = useState<sponsor[]>([])
@@ -339,6 +342,7 @@ function SelectSp({ match, id, f, token }: SP) {
                     style={{ margin: '0 5px' }}
                     onClick={async () => {
                       await submit(e.sponsorPlan.sponPlanId)
+                      sn(!n)
                     }}>确认</Button>
 
                 </td>

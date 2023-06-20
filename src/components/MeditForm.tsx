@@ -193,12 +193,16 @@ function EditForm({ data }: EditProps) {
               t_d.sponsorPlan!.money = arg
               setDetail(t_d)
             }} />
-          <ED title='图片地址' context={detail.sponsorPlan.picture} disabled={true} setContext={
+          <span>图片</span>
+          <div style={{ height: '0h', width: '20vw', margin: '10px 0' }}>
+            <Image src={`${detail.sponsorPlan.picture}`} alt="pic" fluid />
+          </div>
+          {/* <ED title='图片地址' context={detail.sponsorPlan.picture} disabled={true} setContext={
             (arg) => {
               let t_d = detail
               t_d.sponsorPlan!.picture = arg
               setDetail(t_d)
-            }} />
+            }} /> */}
         </>
       }
       {
