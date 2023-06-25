@@ -118,7 +118,6 @@ const Event: NextPage = () => {
                 <th>开始时间</th>
                 <th>结束时间</th>
                 <th>图片</th>
-                <th>举办方名称</th>
               </tr>
             </thead>
             <tbody>
@@ -136,7 +135,6 @@ const Event: NextPage = () => {
                         <Image src={`${e.picture}`} alt="picture" fluid />
                       </div>
                     </td>
-                    <td>{ }</td>
                     <td>
                       <Button
                         variant="secondary"
@@ -152,7 +150,7 @@ const Event: NextPage = () => {
                         <div>
                             <Button
                               variant="info"
-                              style={{ margin: '0 5px' }}
+                              style={{ margin: '10px 5px' }}
                               onClick={
                                 () => {
                                   setShowEdit(!showEdit)

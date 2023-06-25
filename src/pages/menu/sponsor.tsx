@@ -301,6 +301,15 @@ function AddForm() {
   const router = useRouter()
   const [o, setO] = useState<TD>({ advertising: '', prize: '', money: '', picture: '' })
 
+  // edit success window
+  const [editSuc, setEditSuc] = useState(false);
+
+  const setShow = () => {
+    setEditSuc(true)
+    setTimeout(() => {
+      setEditSuc(false)
+    }, 2000)
+  }
   // server token
   const { globalData, setGlobalData } = useContext(GlobalContext)
 
@@ -341,8 +350,14 @@ function AddForm() {
           }
         })
         redirectAuth(res.code, router)
+        setShow()
         console.log(res)
       }}>添加</Button>
+      <br />
+      {
+        editSuc &&
+        <Button style={{ margin: '10px 0' }} variant="outline-success" disabled>修改成功</Button>
+      }
     </div>
   )
 }
